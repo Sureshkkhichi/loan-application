@@ -1,76 +1,114 @@
 # Loan Application - Product Requirements & Technical Architecture (PRD)
 
-## 📌 1. Project Overview & Scope
-- **Project Name**: Loan Application
-- **Platform Scope**: Mobile App (Flutter) / Backend / Admin Panel (as defined)
-- **Objective**: End-to-end digital lending lifecycle manage karna - User onboarding, KYC verification, Loan eligibility calculation, Loan application submission, Approval/Disbursement workflow, aur Repayment/EMI tracking.
+## 📌 1. Project Overview & Business Scope
+- **Project Name**: Loan Application & Lead Collection System
+- **Core Scope**: Customer Lead Capture (Flutter Mobile App) + Sales Completion & Manager Review (Web Portal) + Banker External Handoff & Pendency Notification Cycle.
+- **Out of Scope (By Design)**: Direct Bank LOS APIs, automatic banking disbursements, or internal bank loan sanctioning. Bank processing completely system ke bahar (externally) handle hoti hai.
 
 ---
 
-## 🔄 2. Complete Project Flow & SOP (Standard Operating Procedure)
-1. **User Onboarding & Authentication**:
-   - Mobile OTP-based signup/login.
-   - Profile setup (Name, Email, PAN, Aadhaar info, Employment details).
-2. **KYC & Document Verification**:
-   - Identity & Address verification.
-   - Bank statement upload / Financial data collection.
-3. **Loan Discovery & Eligibility Assessment**:
-   - Loan types (Personal Loan, Business Loan, Instant Cash Loan, etc.).
-   - Credit score / Rule-engine based eligibility check.
-4. **Loan Application Submission**:
-   - Loan amount, tenure, EMI frequency selection.
-   - Bank account linking for disbursement & auto-debit (eNACH / Mandate).
-5. **Underwriting & Approval**:
-   - Automated rule engine + Admin/Credit manager review.
-   - Sanction letter generation & e-Sign.
-6. **Disbursement**:
-   - Direct bank transfer via payment gateway / payout API.
-7. **Repayment & EMI Lifecycle**:
-   - EMI schedules, Upcoming due alerts, Auto-debit retry mechanism.
-   - Manual payment gateway integration (UPI, Netbanking, Cards).
-   - Loan closure & NOC certificate generation.
+## 🏛️ 2. Architectural Blueprint & Repository Structure
+- **Monorepo Architecture**:
+  - `mobile/`: Flutter Mobile App (Customer-facing, State Management: BLoC / Cubit)
+  - `backend/`: Laravel Web Portal & REST API (Sales/Manager Dashboard, MySQL Database, Sanctum Auth)
+- **Role-Based Access Control (RBAC)**:
+  1. **Customer**: Mobile + OTP Login (Single active application per mobile number).
+  2. **Sales Executive**: Web portal login. Leads receive karna, customer ko call karke detailed form fill karna, documents upload karna, "Submit for Review" karna.
+  3. **Manager / Admin**: Applications review karna, Reject (with mandatory reason) karna, "Ready for Bank" mark karke external banker ko share karna, Banker ki Pendency system me add karna.
 
 ---
 
-## 🧩 3. Module-wise Breakdown & Business Rules
-- **Module 1: Authentication & User Profile**
-  - Unique mobile number constraint.
-  - JWT / Session token authentication with refresh mechanism.
-- **Module 2: KYC & Compliance**
-  - PAN format validation (`[A-Z]{5}[0-9]{4}[A-Z]{1}`).
-  - Aadhaar masking / DigiLocker / Verification API integration.
-- **Module 3: Loan Products & Calculator**
-  - Configurable interest rates (Flat / Reducing balance), processing fees, GST.
-  - EMI calculation logic: \( E = P \times r \times \frac{(1+r)^n}{(1+r)^n - 1} \).
-- **Module 4: Loan Application & Underwriting**
-  - Application states: `DRAFT`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, `DISBURSED`, `CLOSED`, `DEFAULTED`.
-- **Module 5: Payments & Ledger**
-  - Immutable transaction log for every debit/credit.
-  - Penalty calculation for overdue payments.
+## 🔄 3. Complete End-to-End Workflow & SOP
+
+```mermaid
+flowchart TD
+    A[Customer App: Mobile + OTP Login] --> B[Basic Loan Form: Name, Type, Amount, City]
+    B --> C[Application Created: Status NEW]
+    C --> D[Web Portal: Sales Team Dashboard]
+    D --> E[Sales Team Calls Customer & Completes Full Form + Docs]
+    E --> F[Sales Marks: Submit for Review]
+    F --> G[Manager / Admin Review]
+    G -->|Reject with Reason| H[Customer Notification: Rejection Reason + Re-apply Option]
+    G -->|Approve for Bank| I[Status: READY_FOR_BANK]
+    I --> J[Manager hands over details to Banker EXTERNALLY]
+    J -->|Banker asks for pending doc/info| K[Manager injects Pendency in Portal]
+    K --> L[Customer receives FCM Push Notification]
+    L --> M[Customer uploads File / submits Text response in App]
+    M --> N[Status: PENDENCY_RESOLVED -> Manager re-verifies]
+    J -->|Banker sanctions loan| O[Manager marks Application: COMPLETED / DISBURSED]
+```
 
 ---
 
-## 🌐 4. API Mapping Architecture
-| Endpoint | Method | Purpose | Request Payload | Response | Screen / Module |
-|---|---|---|---|---|---|
-| `/api/v1/auth/send-otp` | `POST` | Send Mobile OTP | `{ "phone": "string" }` | `{ "status": true, "requestId": "string" }` | Auth Screen |
-| `/api/v1/auth/verify-otp` | `POST` | Verify OTP & Login | `{ "phone": "string", "otp": "string" }` | `{ "token": "jwt", "user": {} }` | OTP Screen |
-| `/api/v1/loans/products` | `GET` | Fetch loan products | Header Auth | `[{ "id": "1", "name": "Personal Loan", ... }]` | Dashboard |
-| `/api/v1/loans/apply` | `POST` | Submit loan application | `{ "productId": "1", "amount": 50000, "tenureMonths": 12 }` | `{ "applicationId": "xyz", "status": "SUBMITTED" }` | Apply Screen |
-| `/api/v1/loans/active` | `GET` | Current active loans & EMIs | Header Auth | `[{ "loanId": "xyz", "nextEmiDate": "...", ... }]` | Repayments |
+## 🧩 4. Application Lifecycle & State Machine
+| Status Code | Description | Next Allowed State | Allowed Roles |
+|---|---|---|---|
+| `NEW` | Customer ne mobile app se basic details submit ki | `IN_PROGRESS` | System / Sales |
+| `IN_PROGRESS` | Sales executive lead par work kar raha hai (calling & collecting docs) | `SUBMITTED_FOR_REVIEW` | Sales Executive |
+| `SUBMITTED_FOR_REVIEW` | Sales ne full details complete karke manager ko submit ki | `UNDER_REVIEW`, `READY_FOR_BANK`, `REJECTED` | Sales / Manager |
+| `UNDER_REVIEW` | Manager application audit kar raha hai | `READY_FOR_BANK`, `REJECTED` | Manager / Admin |
+| `READY_FOR_BANK` | Details verified; external banker ko share ki gayi | `PENDENCY_RAISED`, `COMPLETED`, `REJECTED` | Manager / Admin |
+| `PENDENCY_RAISED` | Banker ne missing doc/info mangi; Customer ko alert bheja gaya | `PENDENCY_RESOLVED` | Manager / Admin |
+| `PENDENCY_RESOLVED` | Customer ne required doc/info mobile app se submit kar di | `READY_FOR_BANK`, `PENDENCY_RAISED` | Customer / Manager |
+| `REJECTED` | Manager ne reason ke saath reject kiya (Customer can re-apply) | `NEW` (on re-apply) | Manager / Admin |
+| `COMPLETED` | Loan banker ke dwara successfully disburse / close ho gaya | Terminal State | Manager / Admin |
 
 ---
 
-## 🗄️ 5. Database Schema & Data Models (Initial Blueprint)
-- **`users`**: id, full_name, phone, email, pan_number, kyc_status, created_at, updated_at
-- **`loan_products`**: id, name, min_amount, max_amount, min_tenure, max_tenure, interest_rate, processing_fee_pct, is_active
-- **`loan_applications`**: id, user_id, product_id, applied_amount, approved_amount, tenure_months, interest_rate, status, sanctioned_at, disbursed_at
-- **`repayment_schedules`**: id, application_id, installment_no, due_date, principal_amount, interest_amount, total_emi, status (`PENDING`, `PAID`, `OVERDUE`)
-- **`transactions`**: id, application_id, user_id, type (`DISBURSEMENT`, `REPAYMENT`, `PENALTY`), amount, status, gateway_ref_id, created_at
+## 📱 5. Flutter Customer Mobile App Specifications
+1. **Authentication**:
+   - Mobile Number input -> SMS OTP verification -> JWT / Sanctum Bearer token.
+2. **Dynamic Routing / Landing Logic**:
+   - Agar customer ka koi **active application** nahi hai -> `ApplyLoanScreen`
+   - Agar customer ka application already **In-Progress / Under Review / Ready for Bank** hai -> `ApplicationStatusDashboard`
+   - Agar application **REJECTED** hai -> Rejection Reason Banner + "Start Fresh Application" button + "Contact Support" action.
+3. **Basic Application Form (Modular Design)**:
+   - Full Name
+   - Loan Type (Personal, Business, Home, Mortgage, etc.)
+   - Required Amount (₹)
+   - City / Pincode
+   - Optional Promo / Referral Code (Marketing lead attribution)
+4. **Pendency Resolution Module**:
+   - Alert Banner: "Action Required: Banker has requested additional details"
+   - Upload Attachment (PDF, JPG, PNG - max 5MB)
+   - Remarks / Text Explanation field
+   - Submit response button (instantly updates manager portal)
+5. **Notifications**:
+   - Firebase Cloud Messaging (FCM) background/foreground push alerts.
+   - In-app Notification list & status badges.
 
 ---
 
-## 🔐 6. Security & Compliance
-- AES-256 encryption for sensitive PII (PAN, Bank details).
-- HTTPS / TLS 1.3 for all in-transit communications.
-- Audit logs for admin approvals and financial transactions.
+## 💻 6. Web Portal Specifications (Sales & Manager)
+1. **Sales Executive View**:
+   - Table of assigned leads.
+   - Click to view customer phone & basic info.
+   - Extended form editor: Personal details, Employment, Income, Existing EMIs, Document uploads.
+   - Button: `Submit for Review`.
+2. **Manager / Admin View**:
+   - Global dashboard & lead pipeline counters.
+   - Application Review Modal with complete information & attached documents.
+   - Action 1: `Reject Application` (requires mandatory text reason, e.g. "Low CIBIL score").
+   - Action 2: `Mark Ready for Bank` (sets status for external handoff).
+   - Action 3: `Add Banker Pendency` (Title, Description, Document type requested, Due date).
+   - Action 4: `Mark Completed / Disbursed`.
+
+---
+
+## 🗄️ 7. Database Schema & Tables
+- **`users`**: id, name, email, phone, password, role (`admin`, `manager`, `sales_executive`, `customer`), fcm_token, created_at
+- **`loan_types`**: id, name, code, is_active
+- **`loan_applications`**:
+  - `id`, `application_number` (e.g. `LN-2026-0001`)
+  - `customer_id`, `assigned_sales_id`
+  - `loan_type_id`, `requested_amount`
+  - `applicant_name`, `city`, `pincode`, `referral_code`, `campaign_source`
+  - `status` (Enum: `NEW`, `IN_PROGRESS`, `SUBMITTED_FOR_REVIEW`, `READY_FOR_BANK`, `PENDENCY_RAISED`, `PENDENCY_RESOLVED`, `REJECTED`, `COMPLETED`)
+  - `rejection_reason` (Text, nullable)
+  - `detailed_payload` (JSON or dedicated columns for sales-filled fields)
+  - `created_at`, `updated_at`
+- **`application_documents`**: id, application_id, document_type, file_path, uploaded_by_role, created_at
+- **`pendencies`**:
+  - `id`, `application_id`, `title`, `description`, `status` (`PENDING`, `RESOLVED`)
+  - `created_by_user_id`, `customer_response_text`, `customer_response_file`, `resolved_at`, `created_at`
+- **`application_activity_logs`**: id, application_id, user_id, action, remarks, created_at
