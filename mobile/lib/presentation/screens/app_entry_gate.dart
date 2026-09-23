@@ -34,12 +34,8 @@ class _AppEntryGateState extends State<AppEntryGate> {
         }
       },
       builder: (context, authState) {
-        if (authState is AuthInitial || authState is AuthLoading) {
+        if (authState is AuthInitial) {
           return const _SplashScreen();
-        }
-
-        if (authState is AuthUnauthenticated || authState is AuthError) {
-          return const LoginScreen();
         }
 
         if (authState is AuthAuthenticated) {

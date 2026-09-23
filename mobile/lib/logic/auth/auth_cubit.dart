@@ -12,7 +12,6 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Check if user has active session
   Future<void> checkAuthStatus() async {
-    emit(AuthLoading());
     try {
       final user = await _authRepository.getSavedUser();
       if (user != null) {
@@ -35,11 +34,9 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthOtpSent(phone: phone, resendCooldownSeconds: cooldown));
       } else {
         emit(AuthError(message: response.message));
-        emit(AuthUnauthenticated());
       }
     } catch (e) {
       emit(AuthError(message: 'Failed to send OTP: $e'));
-      emit(AuthUnauthenticated());
     }
   }
 
@@ -53,11 +50,9 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthAuthenticated(user: user));
       } else {
         emit(AuthError(message: response.message));
-        emit(AuthOtpSent(phone: phone));
       }
     } catch (e) {
       emit(AuthError(message: 'Verification failed: $e'));
-      emit(AuthOtpSent(phone: phone));
     }
   }
 
