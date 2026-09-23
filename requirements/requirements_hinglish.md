@@ -1,7 +1,7 @@
 # Loan Application - Product Requirements & Technical Architecture (PRD)
 
 ## 📌 1. Project Overview & Business Scope
-- **Project Name**: Loan Application & Lead Collection System (Default Brand: **LoanDesk**)
+- **Project Name**: Loan Application & Lead Collection System (Brand: **LoanDesk**)
 - **Core Scope**: Customer Lead Capture (Flutter Mobile App) + Sales Completion & Manager Review (Web Portal) + Banker External Handoff & Pendency Notification Cycle.
 - **Out of Scope (By Design)**: Direct Bank LOS APIs, automatic banking disbursements, or internal bank loan sanctioning. Bank processing completely system ke bahar (externally) handle hoti hai.
 
@@ -25,108 +25,50 @@
 | **Warning** | `#D99000` | Pendency / Action Required alerts |
 | **Error / Destructive** | `#D64545` | Rejection banners, Field validation errors |
 
-### Visual Design Rules:
-- **Typography**: Inter / Modern Sans-Serif with clean hierarchy.
-- **Corners**: Rounded `12px` (Range: 10–14px) for all cards and inputs.
-- **Elevation**: Minimal elevation (1–2dp) + subtle `1px` border (`#E4E8EF`).
-- **Button Height**: `50px` (48–52px) large comfortable touch targets.
-- **Spacing**: Strict 8px grid system (`8, 16, 24, 32, 40`).
-- **Web Portal Alignment**: Same brand colors, denser data-oriented productivity layout.
-
 ---
 
 ## 🏛️ 3. Architectural Blueprint & Repository Structure
 - **Monorepo Architecture**:
   - `mobile/`: Flutter Mobile App (Customer-facing, State Management: BLoC / Cubit)
-  - `backend/`: Laravel Web Portal & REST API (Sales/Manager Dashboard, MySQL Database, Sanctum Auth)
+  - `backend/`: Laravel 12 Web Portal & REST API (Sales/Manager Dashboard, MySQL Database, Sanctum Auth)
 - **Role-Based Access Control (RBAC)**:
   1. **Customer**: Mobile + OTP Login (Single active application per mobile number).
-  2. **Sales Executive**: Web portal login. Leads receive karna, customer ko call karke detailed form fill karna, documents upload karna, "Submit for Review" karna.
-  3. **Manager / Admin**: Applications review karna, Reject (with mandatory reason) karna, "Ready for Bank" mark karke external banker ko share karna, Banker ki Pendency system me add karna.
+  2. **Sales Executive**: Web portal login (`sales@loandesk.com` / `password123`). Leads receive karna, customer ko call karke detailed form fill karna, documents upload karna, "Submit for Review" karna.
+  3. **Manager / Admin**: Applications review karna (`admin@loandesk.com` / `password123`), Reject (with mandatory reason) karna, "Ready for Bank" mark karke external banker ko share karna, Banker ki Pendency system me add karna.
 
 ---
 
-## 🔄 4. Complete End-to-End Workflow & SOP
-
-```mermaid
-flowchart TD
-    A[Customer App: Mobile + OTP Login] --> B[Basic Loan Form: Name, Type, Amount, City]
-    B --> C[Application Created: Status NEW]
-    C --> D[Web Portal: Sales Team Dashboard]
-    D --> E[Sales Team Calls Customer & Completes Full Form + Docs]
-    E --> F[Sales Marks: Submit for Review]
-    F --> G[Manager / Admin Review]
-    G -->|Reject with Reason| H[Customer Notification: Rejection Reason + Re-apply Option]
-    G -->|Approve for Bank| I[Status: READY_FOR_BANK]
-    I --> J[Manager hands over details to Banker EXTERNALLY]
-    J -->|Banker asks for pending doc/info| K[Manager injects Pendency in Portal]
-    K --> L[Customer receives FCM Push Notification]
-    L --> M[Customer uploads File / submits Text response in App]
-    M --> N[Status: PENDENCY_RESOLVED -> Manager re-verifies]
-    J -->|Banker sanctions loan| O[Manager marks Application: COMPLETED / DISBURSED]
-```
+## 🌐 4. API Endpoints Specification (Tested & Live)
+| Endpoint | Method | Auth | Payload / Params | Response | Usage / Screen |
+|---|---|---|---|---|---|
+| `/api/v1/auth/send-otp` | `POST` | Public | `{ "phone": "9876543210" }` | `{ "success": true, "data": { "resend_cooldown_seconds": 30 } }` | Customer Login Screen |
+| `/api/v1/auth/verify-otp` | `POST` | Public | `{ "phone": "9876543210", "otp": "123456" }` | `{ "token": "...", "user": { ... } }` | Customer OTP Verification |
+| `/api/v1/loan-types` | `GET` | Public | None | `[{ "id": 1, "name": "Personal Loan", "code": "personal" }]` | Apply Loan Screen Dropdown |
+| `/api/v1/applications` | `POST` | Sanctum | `{ "applicant_name": "...", "loan_type_id": 1, "requested_amount": 500000, "city": "Jaipur", "pincode": "302001", "referral_code": "..." }` | `{ "success": true, "data": { "application_number": "LD-2026-00001" } }` | Apply Loan Screen Submit |
+| `/api/v1/applications/active` | `GET` | Sanctum | None | Active LoanApplication object with `loanType`, `activePendency`, `activities` | Customer Status Dashboard |
+| `/api/v1/pendencies/{id}/resolve` | `POST` | Sanctum | Multipart: `response_text`, `file` (PDF/Image max 5MB) | `{ "success": true, "message": "..." }` | Pendency Bottom Sheet Modal |
 
 ---
 
-## 📱 5. Flutter Customer Mobile App Screen Specifications
-- **Navigation Model**: **State-Driven Focused Architecture (Zero Navigation Clutter)**. Koi bottom navigation bar nahi hoga; user current state ke hisaab se directly target action par land hoga:
-
-1. **Screen 1: Login & OTP Verification**:
-   - Mobile number input with country code (+91).
-   - 6-Digit PIN box with 30s resend countdown.
-   - Development test bypass (`123456`) enabled for instant development.
-   - Trust badge: *"Secure • Simple • Fast"*.
-2. **Screen 2: Apply for Loan (Single Clean Form)**:
-   - Single-screen high-conversion form:
-     - Full Name
-     - Loan Type Dropdown (Personal, Business, Home, Loan Against Property, Education)
-     - Required Loan Amount (₹)
-     - City & Pincode
-     - (Optional) Referral / Promo Code
-   - Form submission generates Application ID (e.g. `LD-2026-000123`).
-3. **Screen 3: Application Status & Timeline**:
-   - Status header chip (`Application Submitted`, `Under Review`, `Ready for Bank`).
-   - Clean vertical step timeline showing application progression.
-   - **Rejection State**: Red warning banner clearly showing Manager's rejection reason + *"Start Fresh Application"* & *"Contact Support"* buttons.
-4. **Screen 4: Pendency Resolution (In-Place Bottom Sheet)**:
-   - In-place high-visibility warning card on Status screen: *"Action Required: Banker has requested [Doc Name]"*.
-   - Tap karne par modal bottom-sheet open hogi:
-     - File Picker (PDF/JPG/PNG - max 5MB).
-     - Text remarks / explanation input.
-     - Submit button -> Real-time status update to `PENDENCY_RESOLVED`.
+## 💻 5. Web Portal Operations Routes
+- `GET /login` & `POST /login`: Staff Authentication
+- `GET /dashboard`: Overview metrics counters & filtered leads table
+- `GET /applications/{id}`: Detailed Lead Review sheet, caller form, and action bar
+- `POST /applications/{id}/assign`: Assign lead to sales executive
+- `POST /applications/{id}/update-details`: Sales updates caller form data & discussion notes
+- `POST /applications/{id}/upload-doc`: Sales uploads customer documents
+- `POST /applications/{id}/submit-review`: Submit lead to manager (`SUBMITTED_FOR_REVIEW`)
+- `POST /applications/{id}/ready-for-bank`: Manager marks `READY_FOR_BANK` for external banker
+- `POST /applications/{id}/add-pendency`: Manager injects banker pendency (`PENDENCY_RAISED`)
+- `POST /applications/{id}/reject`: Manager rejects with mandatory reason (`REJECTED`)
+- `POST /applications/{id}/complete`: Manager marks loan as disbursed/completed (`COMPLETED`)
 
 ---
 
-## 💻 6. Web Portal Specifications (Sales & Manager)
-1. **Sales Executive Module**:
-   - Table of assigned leads.
-   - Customer dialer/contact view.
-   - Extended form editor: Personal details, Employment, Income, Existing EMIs, Document uploads.
-   - Button: `Submit for Review`.
-2. **Manager / Admin Module**:
-   - Global dashboard & lead pipeline counters.
-   - Application Review Modal with complete information & attached documents.
-   - Action 1: `Reject Application` (requires mandatory text reason, e.g. "Low CIBIL score").
-   - Action 2: `Mark Ready for Bank` (sets status for external handoff).
-   - Action 3: `Add Banker Pendency` (Title, Description, Document type requested, Due date).
-   - Action 4: `Mark Completed / Disbursed`.
-
----
-
-## 🗄️ 7. Database Schema & Tables
-- **`users`**: id, name, email, phone, password, role (`admin`, `manager`, `sales_executive`, `customer`), fcm_token, created_at
-- **`loan_types`**: id, name, code, is_active
-- **`loan_applications`**:
-  - `id`, `application_number` (e.g. `LD-2026-000123`)
-  - `customer_id`, `assigned_sales_id`
-  - `loan_type_id`, `requested_amount`
-  - `applicant_name`, `city`, `pincode`, `referral_code`, `campaign_source`
-  - `status` (Enum: `NEW`, `IN_PROGRESS`, `SUBMITTED_FOR_REVIEW`, `READY_FOR_BANK`, `PENDENCY_RAISED`, `PENDENCY_RESOLVED`, `REJECTED`, `COMPLETED`)
-  - `rejection_reason` (Text, nullable)
-  - `detailed_payload` (JSON structure for sales-collected extended attributes)
-  - `created_at`, `updated_at`
-- **`application_documents`**: id, application_id, document_type, file_path, uploaded_by_role, created_at
-- **`pendencies`**:
-  - `id`, `application_id`, `title`, `description`, `status` (`PENDING`, `RESOLVED`)
-  - `created_by_user_id`, `customer_response_text`, `customer_response_file`, `resolved_at`, `created_at`
-- **`application_activity_logs`**: id, application_id, user_id, action, remarks, created_at
+## 🗄️ 6. MySQL Database Details
+- **Database Name**: `loan_application`
+- **Host**: `127.0.0.1:3306`
+- **Username**: `root`
+- **Password**: `password`
+- **Tables**: `users`, `otp_verifications`, `loan_types`, `loan_applications`, `application_documents`, `pendencies`, `application_activity_logs`, `personal_access_tokens`.
+- **Raw SQL Reference**: `backend/database/schema_raw.sql`
