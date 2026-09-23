@@ -36,7 +36,19 @@
 
 ---
 
-## 4. API Endpoints Specification (Tested & Live)
+## 4. Flutter Customer Mobile App Architecture (`mobile/`)
+- **State Management**: BLoC / Cubit (`AuthCubit`, `LoanCubit`)
+- **State-Driven Routing**: `AppEntryGate` (Zero navigation clutter)
+  - Unauthenticated -> `LoginScreen` (+91 Mobile input) -> `OtpScreen` (6-digit PIN box, 30s resend timer, dev bypass `123456`).
+  - Authenticated & No active loan -> `ApplyLoanScreen` (Modular form: Name, Type, Amount, City, Pincode, Referral code).
+  - Authenticated & Active loan in progress -> `StatusDashboardScreen` (Live timeline, status badge, pull-to-refresh).
+  - Banker pendency raised -> In-place `PendencyActionCard` alert banner -> Tap launches `ResolvePendencySheet` (File upload max 5MB + explanation notes).
+  - Application declined -> Rejection Banner with credit officer reason + *"Start Fresh Application"* action.
+- **Automated Verification**: `flutter test` smoke test suite verified with `0 errors`.
+
+---
+
+## 5. API Endpoints Specification (Tested & Live)
 | Endpoint | Method | Auth | Payload / Params | Response | Usage / Screen |
 |---|---|---|---|---|---|
 | `/api/v1/auth/send-otp` | `POST` | Public | `{ "phone": "9876543210" }` | `{ "success": true, "data": { "resend_cooldown_seconds": 30 } }` | Customer Login Screen |
@@ -48,7 +60,7 @@
 
 ---
 
-## 5. Web Portal Operations Routes
+## 6. Web Portal Operations Routes
 - `GET /login` & `POST /login`: Staff Authentication
 - `GET /dashboard`: Overview metrics counters & filtered leads table
 - `GET /applications/{id}`: Detailed Lead Review sheet, caller form, and action bar
@@ -63,7 +75,7 @@
 
 ---
 
-## 6. MySQL Database Details
+## 7. MySQL Database Details
 - **Database Name**: `loan_application`
 - **Host**: `127.0.0.1:3306`
 - **Username**: `root`

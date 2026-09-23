@@ -28,7 +28,7 @@
 ---
 
 ## 🏛️ 3. Architectural Blueprint & Repository Structure
-- **Monorepo Architecture**:
+- **Monorepo Layout**:
   - `mobile/`: Flutter Mobile App (Customer-facing, State Management: BLoC / Cubit)
   - `backend/`: Laravel 12 Web Portal & REST API (Sales/Manager Dashboard, MySQL Database, Sanctum Auth)
 - **Role-Based Access Control (RBAC)**:
@@ -38,7 +38,19 @@
 
 ---
 
-## 🌐 4. API Endpoints Specification (Tested & Live)
+## 📱 4. Flutter Customer Mobile App Architecture (`mobile/`)
+- **State Management**: BLoC / Cubit (`AuthCubit`, `LoanCubit`)
+- **Entry Routing**: State-driven `AppEntryGate` (Zero navigation clutter)
+  - Agar user logged-in nahi hai -> `LoginScreen` (+91 Mobile number input) -> `OtpScreen` (6-digit PIN box, 30s resend timer, dev bypass `123456`).
+  - Agar logged-in hai aur koi active application nahi hai -> `ApplyLoanScreen` (Modular fixed form: Name, Type, Amount, City, Pincode, Referral code).
+  - Agar active application in progress hai -> `StatusDashboardScreen` (Live timeline, status chip, pull-to-refresh).
+  - Agar banker ne pendency raise ki -> In-place `PendencyActionCard` alert banner -> Tap opens `ResolvePendencySheet` (File upload max 5MB + explanation remarks note).
+  - Agar application reject ho gayi -> Rejection Banner with credit officer reason + *"Start Fresh Application"* action.
+- **Automated Verification**: `flutter test` smoke test suite passed with `0 errors`.
+
+---
+
+## 🌐 5. API Endpoints Specification (Tested & Live)
 | Endpoint | Method | Auth | Payload / Params | Response | Usage / Screen |
 |---|---|---|---|---|---|
 | `/api/v1/auth/send-otp` | `POST` | Public | `{ "phone": "9876543210" }` | `{ "success": true, "data": { "resend_cooldown_seconds": 30 } }` | Customer Login Screen |
@@ -50,7 +62,7 @@
 
 ---
 
-## 💻 5. Web Portal Operations Routes
+## 💻 6. Web Portal Operations Routes
 - `GET /login` & `POST /login`: Staff Authentication
 - `GET /dashboard`: Overview metrics counters & filtered leads table
 - `GET /applications/{id}`: Detailed Lead Review sheet, caller form, and action bar
@@ -65,7 +77,7 @@
 
 ---
 
-## 🗄️ 6. MySQL Database Details
+## 🗄️ 7. MySQL Database Details
 - **Database Name**: `loan_application`
 - **Host**: `127.0.0.1:3306`
 - **Username**: `root`
