@@ -1,13 +1,41 @@
 # Loan Application - Product Requirements Document & Technical Architecture
 
 ## 1. Project Overview & Scope
-- **Project Name**: Loan Application & Lead Collection Management System
+- **Project Name**: Loan Application & Lead Collection Management System (Default Brand: **LoanDesk**)
 - **Core Scope**: Customer Lead Capture (Flutter Mobile App) + Sales Completion & Manager Quality Review (Web Portal) + External Banker Handoff & Customer Pendency Notification Cycle.
 - **Out of Scope (By Design)**: Direct Banking LOS APIs, automatic disbursement webhooks, and automated underwriting sanction engines. External banking processing is conducted outside the software platform.
 
 ---
 
-## 2. Architecture & Monorepo Structure
+## 2. Design System & Brand Identity (Modern Trust Fintech)
+> **Core Tenet**: Avoid flashy gamification or payment-app clones. The UI conveys: *"This is a credible, professional financial institution securely processing my application."*
+
+### Color Palette:
+| Token Name | Hex Code | Purpose / Usage |
+|---|---|---|
+| **Primary** | `#123B6D` | Deep Navy (App bar, Primary buttons, Brand identity) |
+| **Primary Dark** | `#0B294D` | Dark Blue (Pressed states, Headers) |
+| **Accent / Action** | `#16A085` | Restrained Teal (Action buttons, positive highlights) |
+| **Background** | `#F6F8FB` | Cool Light Grey (Scaffold background) |
+| **Surface** | `#FFFFFF` | Clean White (Cards, Bottom sheets, Dialogs) |
+| **Text Primary** | `#172033` | Dark Charcoal (Headings, Main form labels) |
+| **Text Secondary** | `#667085` | Muted Grey (Subtitles, Timestamps, Helper text) |
+| **Border / Divider** | `#E4E8EF` | Subtle borders for inputs and cards |
+| **Success** | `#168A5B` | Approved / Verified / Resolved states |
+| **Warning** | `#D99000` | Pendency / Action Required alerts |
+| **Error / Destructive** | `#D64545` | Rejection banners, Field validation errors |
+
+### Visual Design Guidelines:
+- **Typography**: Inter / Modern Sans-Serif with legible weight hierarchy.
+- **Corners**: Rounded `12px` (Range: 10–14px) on inputs and cards.
+- **Elevation**: Minimal elevation (1–2dp) + subtle `1px` border (`#E4E8EF`).
+- **Button Height**: `50px` (48–52px) large, tactile touch targets.
+- **Grid & Spacing**: Strict 8px grid system (`8, 16, 24, 32, 40`).
+- **Web Portal Alignment**: Shared brand palette with higher data density for desktop operations.
+
+---
+
+## 3. Architecture & Monorepo Structure
 - **Monorepo Layout**:
   - `mobile/`: Flutter Mobile App (Customer-facing, State Management: BLoC / Cubit)
   - `backend/`: Laravel Web Portal & REST API (Sales/Manager Dashboard, MySQL Database, Sanctum Auth)
@@ -18,7 +46,7 @@
 
 ---
 
-## 3. End-to-End Workflow & SOP
+## 4. End-to-End Workflow & SOP
 
 ```mermaid
 flowchart TD
@@ -40,42 +68,32 @@ flowchart TD
 
 ---
 
-## 4. Application Lifecycle & State Machine
-| Status Code | Description | Next Allowed State | Authorized Roles |
-|---|---|---|---|
-| `NEW` | Basic application submitted via Customer App | `IN_PROGRESS` | System / Sales |
-| `IN_PROGRESS` | Sales executive actively contacting customer & collecting details | `SUBMITTED_FOR_REVIEW` | Sales Executive |
-| `SUBMITTED_FOR_REVIEW` | Sales completed form details & submitted to manager | `UNDER_REVIEW`, `READY_FOR_BANK`, `REJECTED` | Sales / Manager |
-| `UNDER_REVIEW` | Manager auditing application details | `READY_FOR_BANK`, `REJECTED` | Manager / Admin |
-| `READY_FOR_BANK` | Details verified and provided to external banker | `PENDENCY_RAISED`, `COMPLETED`, `REJECTED` | Manager / Admin |
-| `PENDENCY_RAISED` | Banker raised a discrepancy; Customer notified to respond | `PENDENCY_RESOLVED` | Manager / Admin |
-| `PENDENCY_RESOLVED` | Customer submitted response file/text via Mobile App | `READY_FOR_BANK`, `PENDENCY_RAISED` | Customer / Manager |
-| `REJECTED` | Manager rejected application with explicit reason | `NEW` (via fresh application) | Manager / Admin |
-| `COMPLETED` | Loan sanctioned and disbursed by external bank | Terminal State | Manager / Admin |
+## 5. Flutter Customer Mobile App Screen Specifications
+- **Navigation Model**: **State-Driven Focused Architecture (Zero Navigation Clutter)**. No bottom navigation bar; the app routes directly based on application state:
 
----
-
-## 5. Flutter Customer Mobile App Specifications
-1. **Authentication**:
-   - Mobile Number input -> SMS OTP verification -> JWT / Sanctum Bearer token.
-2. **Dynamic Entry Routing**:
-   - No active application -> `ApplyLoanScreen` (Modular Form)
-   - Active application in progress -> `ApplicationStatusDashboard`
-   - Rejected application -> Rejection Banner (displays reason) + "Start Fresh Application" action.
-3. **Basic Application Form (Modular Design)**:
-   - Full Name
-   - Loan Type (Personal, Business, Home, Mortgage, etc.)
-   - Required Amount (INR)
-   - City / Pincode
-   - Optional Promo / Referral Code (Marketing lead attribution)
-4. **Pendency Resolution Module**:
-   - Alert Card: Banker requested clarification / additional documents
-   - Document upload support (PDF, JPG, PNG - max 5MB)
-   - Text explanation field
-   - Submission action triggering instant webhook/event to Manager portal.
-5. **Notification System**:
-   - Firebase Cloud Messaging (FCM) background/foreground push integration.
-   - In-app notification center and status tracking timeline.
+1. **Screen 1: Login & OTP Verification**:
+   - Mobile number input (+91).
+   - 6-Digit PIN box with 30s resend timer.
+   - Development test bypass (`123456`) enabled for rapid local testing.
+   - Micro-copy: *"Secure • Simple • Fast"*.
+2. **Screen 2: Apply for Loan (Single Clean Form)**:
+   - High-conversion single card layout:
+     - Full Name
+     - Loan Type Dropdown (Personal, Business, Home, Loan Against Property, Education)
+     - Required Loan Amount (INR)
+     - City & Pincode
+     - (Optional) Referral / Promo Code
+   - Instant submission generating Application ID (e.g. `LD-2026-000123`).
+3. **Screen 3: Application Status & Timeline**:
+   - Status header chip (`Application Submitted`, `Under Review`, `Ready for Bank`).
+   - Clean vertical step timeline showing progress.
+   - **Rejection Banner**: Red alert card stating exact reason + *"Start Fresh Application"* & *"Contact Support"*.
+4. **Screen 4: Pendency Resolution (In-Place Bottom Sheet)**:
+   - High-priority banner on Status screen: *"Action Required: Banker has requested [Doc Name]"*.
+   - Tap presents a modal bottom sheet:
+     - File Picker (PDF, JPG, PNG - max 5MB).
+     - Text remarks / explanation input.
+     - Submission triggers transition to `PENDENCY_RESOLVED`.
 
 ---
 
@@ -99,7 +117,7 @@ flowchart TD
 - **`users`**: id, name, email, phone, password, role (`admin`, `manager`, `sales_executive`, `customer`), fcm_token, created_at
 - **`loan_types`**: id, name, code, is_active
 - **`loan_applications`**:
-  - `id`, `application_number` (e.g. `LN-2026-0001`)
+  - `id`, `application_number` (e.g. `LD-2026-000123`)
   - `customer_id`, `assigned_sales_id`
   - `loan_type_id`, `requested_amount`
   - `applicant_name`, `city`, `pincode`, `referral_code`, `campaign_source`
