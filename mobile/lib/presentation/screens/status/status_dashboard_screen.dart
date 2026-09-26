@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/loan_application_model.dart';
 import '../../../logic/application/loan_cubit.dart';
@@ -13,13 +14,14 @@ import '../../widgets/timeline_widget.dart';
 class StatusDashboardScreen extends StatelessWidget {
   final LoanApplicationModel application;
 
-  const StatusDashboardScreen({
-    super.key,
-    required this.application,
-  });
+  const StatusDashboardScreen({super.key, required this.application});
 
   String _formatCurrency(double amount) {
-    final format = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
+    final format = NumberFormat.currency(
+      locale: 'en_IN',
+      symbol: '₹',
+      decimalDigits: 0,
+    );
     return format.format(amount);
   }
 
@@ -105,7 +107,6 @@ class StatusDashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // Application Summary Card
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -115,7 +116,7 @@ class StatusDashboardScreen extends StatelessWidget {
                     border: Border.all(color: AppColors.border),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
+                        color: Colors.black.withValues(alpha: 0.02),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -128,9 +129,12 @@ class StatusDashboardScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.08),
+                              color: AppColors.primary.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -144,12 +148,17 @@ class StatusDashboardScreen extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(application.status).withOpacity(0.12),
+                              color: _getStatusColor(application.status)
+                                  .withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: _getStatusColor(application.status).withOpacity(0.3),
+                                color: _getStatusColor(application.status)
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -195,14 +204,21 @@ class StatusDashboardScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF2F2),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFFECACA), width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFFFECACA),
+                        width: 1.5,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: const [
-                            Icon(Icons.cancel_rounded, color: AppColors.error, size: 24),
+                            Icon(
+                              Icons.cancel_rounded,
+                              color: AppColors.error,
+                              size: 24,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'Application Declined',
@@ -225,7 +241,8 @@ class StatusDashboardScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          application.rejectionReason ?? 'Criteria not met at this time.',
+                          application.rejectionReason ??
+                              'Criteria not met at this time.',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -248,11 +265,15 @@ class StatusDashboardScreen extends StatelessWidget {
                 ],
 
                 // Banker Pendency Action Card (In-place Highlight)
-                if (application.isPendencyRaised && application.activePendency != null) ...[
+                if (application.isPendencyRaised &&
+                    application.activePendency != null) ...[
                   PendencyActionCard(
                     pendency: application.activePendency!,
                     onResolveTap: () {
-                      ResolvePendencySheet.show(context, application.activePendency!);
+                      ResolvePendencySheet.show(
+                        context,
+                        application.activePendency!,
+                      );
                     },
                   ),
                   const SizedBox(height: 20),
@@ -273,7 +294,11 @@ class StatusDashboardScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: const [
-                            Icon(Icons.verified_rounded, color: AppColors.success, size: 26),
+                            Icon(
+                              Icons.verified_rounded,
+                              color: AppColors.success,
+                              size: 26,
+                            ),
                             SizedBox(width: 10),
                             Text(
                               'Congratulations! Loan Disbursed',
@@ -288,7 +313,10 @@ class StatusDashboardScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         const Text(
                           'Your loan has been successfully sanctioned and disbursed by the partner bank.',
-                          style: TextStyle(fontSize: 13, color: Color(0xFF166534)),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF166534),
+                          ),
                         ),
                       ],
                     ),
@@ -312,7 +340,11 @@ class StatusDashboardScreen extends StatelessWidget {
                   ),
                   child: Row(
                     children: const [
-                      Icon(Icons.support_agent_rounded, size: 24, color: AppColors.primary),
+                      Icon(
+                        Icons.support_agent_rounded,
+                        size: 24,
+                        color: AppColors.primary,
+                      ),
                       SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -328,7 +360,10 @@ class StatusDashboardScreen extends StatelessWidget {
                             ),
                             Text(
                               'Your assigned executive will contact you shortly.',
-                              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../data/models/loan_type_model.dart';
 import '../../../logic/application/loan_cubit.dart';
@@ -12,10 +13,7 @@ import '../../widgets/custom_text_field.dart';
 class ApplyLoanScreen extends StatefulWidget {
   final List<LoanTypeModel> loanTypes;
 
-  const ApplyLoanScreen({
-    super.key,
-    required this.loanTypes,
-  });
+  const ApplyLoanScreen({super.key, required this.loanTypes});
 
   @override
   State<ApplyLoanScreen> createState() => _ApplyLoanScreenState();
@@ -59,7 +57,9 @@ class _ApplyLoanScreenState extends State<ApplyLoanScreen> {
         return;
       }
 
-      final amount = double.tryParse(_amountController.text.replaceAll(',', '').trim()) ?? 0;
+      final amount =
+          double.tryParse(_amountController.text.replaceAll(',', '').trim()) ??
+          0;
 
       context.read<LoanCubit>().submitApplication(
         applicantName: _nameController.text.trim(),
@@ -133,7 +133,7 @@ class _ApplyLoanScreenState extends State<ApplyLoanScreen> {
                         border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
+                            color: Colors.black.withValues(alpha: 0.02),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -168,10 +168,13 @@ class _ApplyLoanScreenState extends State<ApplyLoanScreen> {
                           ),
                           const SizedBox(height: 6),
                           DropdownButtonFormField<LoanTypeModel>(
-                            value: _selectedLoanType,
+                            initialValue: _selectedLoanType,
                             isExpanded: true,
                             decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
                             ),
                             items: widget.loanTypes.map((type) {
                               return DropdownMenuItem<LoanTypeModel>(
@@ -218,7 +221,9 @@ class _ApplyLoanScreenState extends State<ApplyLoanScreen> {
                               if (val == null || val.trim().isEmpty) {
                                 return 'Please enter requested loan amount';
                               }
-                              final amt = double.tryParse(val.replaceAll(',', ''));
+                              final amt = double.tryParse(
+                                val.replaceAll(',', ''),
+                              );
                               if (amt == null || amt < 10000) {
                                 return 'Minimum loan amount is ₹10,000';
                               }
@@ -289,13 +294,17 @@ class _ApplyLoanScreenState extends State<ApplyLoanScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.04),
+                        color: AppColors.primary.withValues(alpha: 0.04),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Row(
                         children: const [
-                          Icon(Icons.lock_outline_rounded, size: 18, color: AppColors.primary),
+                          Icon(
+                            Icons.lock_outline_rounded,
+                            size: 18,
+                            color: AppColors.primary,
+                          ),
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(

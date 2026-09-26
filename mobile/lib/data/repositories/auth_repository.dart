@@ -1,5 +1,7 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/constants/app_constants.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/api_endpoints.dart';
@@ -8,13 +10,12 @@ import '../models/user_model.dart';
 class AuthRepository {
   final ApiClient _apiClient;
 
-  AuthRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  AuthRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Send OTP to mobile number
   Future<ApiResponse> sendOtp(String phone) async {
-    return await _apiClient.post(ApiEndpoints.sendOtp, {
-      'phone': phone,
-    });
+    return await _apiClient.post(ApiEndpoints.sendOtp, {'phone': phone});
   }
 
   /// Verify 6-digit OTP and store Sanctum token
@@ -26,7 +27,7 @@ class AuthRepository {
     final response = await _apiClient.post(ApiEndpoints.verifyOtp, {
       'phone': phone,
       'otp': otp,
-      if (fcmToken != null) 'fcm_token': fcmToken,
+      'fcm_token': ?fcmToken,
     });
 
     if (response.success && response.data != null) {

@@ -39,6 +39,7 @@
             font-family: 'Inter', sans-serif;
         }
     </style>
+    @livewireStyles
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -107,6 +108,7 @@
             </div>
         @endif
 
+        {{ $slot ?? '' }}
         @yield('content')
     </main>
 
@@ -117,5 +119,6 @@
         </div>
     </footer>
 
+    @livewireScripts
 </body>
 </html>

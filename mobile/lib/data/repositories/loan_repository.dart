@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import '../../core/network/api_client.dart';
 import '../../core/network/api_endpoints.dart';
 import '../models/loan_application_model.dart';
@@ -7,7 +8,8 @@ import '../models/loan_type_model.dart';
 class LoanRepository {
   final ApiClient _apiClient;
 
-  LoanRepository({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
+  LoanRepository({ApiClient? apiClient})
+    : _apiClient = apiClient ?? ApiClient();
 
   /// Fetch active loan types catalog
   Future<List<LoanTypeModel>> fetchLoanTypes() async {
@@ -24,7 +26,9 @@ class LoanRepository {
   Future<LoanApplicationModel?> fetchActiveApplication() async {
     final response = await _apiClient.get(ApiEndpoints.activeApplication);
     if (response.success && response.data != null) {
-      return LoanApplicationModel.fromJson(response.data as Map<String, dynamic>);
+      return LoanApplicationModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     }
     return null;
   }
@@ -45,8 +49,9 @@ class LoanRepository {
       'requested_amount': requestedAmount,
       'city': city,
       if (pincode != null && pincode.isNotEmpty) 'pincode': pincode,
-      if (referralCode != null && referralCode.isNotEmpty) 'referral_code': referralCode,
-      if (campaignSource != null) 'campaign_source': campaignSource,
+      if (referralCode != null && referralCode.isNotEmpty)
+        'referral_code': referralCode,
+      'campaign_source': ?campaignSource,
     });
   }
 

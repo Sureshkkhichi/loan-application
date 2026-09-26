@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../logic/application/loan_cubit.dart';
@@ -59,11 +60,18 @@ class _AppEntryGateState extends State<AppEntryGate> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.cloud_off_rounded, size: 48, color: AppColors.error),
+                          const Icon(
+                            Icons.cloud_off_rounded,
+                            size: 48,
+                            color: AppColors.error,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             loanState.message,
-                            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textPrimary,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
@@ -99,9 +107,7 @@ class _AppEntryGateState extends State<AppEntryGate> {
                 }
 
                 // Otherwise, show high-conversion clean apply screen
-                return ApplyLoanScreen(
-                  loanTypes: loanState.loanTypes,
-                );
+                return ApplyLoanScreen(loanTypes: loanState.loanTypes);
               }
 
               return const _SplashScreen();
@@ -134,7 +140,7 @@ class _SplashScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),

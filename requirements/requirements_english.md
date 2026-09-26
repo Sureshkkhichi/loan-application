@@ -60,18 +60,26 @@
 
 ---
 
-## 6. Web Portal Operations Routes
-- `GET /login` & `POST /login`: Staff Authentication
-- `GET /dashboard`: Overview metrics counters & filtered leads table
-- `GET /applications/{id}`: Detailed Lead Review sheet, caller form, and action bar
-- `POST /applications/{id}/assign`: Assign lead to sales executive
-- `POST /applications/{id}/update-details`: Sales updates caller form data & discussion notes
-- `POST /applications/{id}/upload-doc`: Sales uploads customer documents
-- `POST /applications/{id}/submit-review`: Submit lead to manager (`SUBMITTED_FOR_REVIEW`)
-- `POST /applications/{id}/ready-for-bank`: Manager marks `READY_FOR_BANK` for external banker
-- `POST /applications/{id}/add-pendency`: Manager injects banker pendency (`PENDENCY_RAISED`)
-- `POST /applications/{id}/reject`: Manager rejects with mandatory reason (`REJECTED`)
-- `POST /applications/{id}/complete`: Manager marks loan as disbursed/completed (`COMPLETED`)
+## 6. Web Portal Operations Architecture (Livewire Reactive Components)
+- **Framework**: Laravel 12 + **Livewire 3/4** (Zero-reload reactive SPA experience for internal operations).
+- **Interactive Livewire Components**:
+  1. `App\Livewire\Auth\Login`: Staff authentication with live validation and loading indicators.
+  2. `App\Livewire\Dashboard`:
+     - Real-time debounced lead search (`wire:model.live.debounce.300ms="search"`).
+     - Reactive metric pipeline cards (`All`, `New`, `Calling`, `Review`, `With Bank`, `Pendency`, `Disbursed`, `Rejected`).
+     - Sales Rep "My Leads" toggle (`wire:click="toggleMyLeads"`).
+     - Live pagination (`WithPagination`) and instant status badges.
+  3. `App\Livewire\Applications\ApplicationDetail`:
+     - Sales Lead Assignment (`wire:click="assignSales"`).
+     - Detailed Caller Form auto-save with live field validation (`wire:click="saveDetails"`).
+     - Live document upload (`WithFileUploads`) with upload progress indicator.
+     - Sales Review Submission (`wire:click="submitReview"`).
+     - Manager "Ready for Bank" external handoff (`wire:click="readyForBank"`).
+     - Interactive Banker Pendency Modal (`$showPendencyModal` + `wire:click="savePendency"`).
+     - Interactive Application Rejection Modal with mandatory reason (`$showRejectModal` + `wire:click="confirmReject"`).
+     - Loan Disbursement Completion (`wire:click="markCompleted"`).
+     - Live Activity Audit Trail & Pendency resolution tracker.
+- **Form POST Endpoints**: Preserved for automated feature testing & backward compatibility (`applications.assign`, `applications.update-details`, etc.).
 
 ---
 

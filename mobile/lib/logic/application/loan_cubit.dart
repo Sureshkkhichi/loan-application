@@ -1,5 +1,7 @@
 import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../data/models/loan_application_model.dart';
 import '../../data/models/loan_type_model.dart';
 import '../../data/repositories/loan_repository.dart';
@@ -10,9 +12,7 @@ class LoanCubit extends Cubit<LoanState> {
   List<LoanTypeModel> _cachedLoanTypes = [];
   LoanApplicationModel? _cachedApplication;
 
-  LoanCubit({required LoanRepository loanRepository})
-      : _loanRepository = loanRepository,
-        super(LoanInitial());
+  LoanCubit({required this._loanRepository}) : super(LoanInitial());
 
   /// Load initial loan types and active application
   Future<void> loadLoanData({bool silent = false}) async {
@@ -24,10 +24,12 @@ class LoanCubit extends Cubit<LoanState> {
       final activeApp = await _loanRepository.fetchActiveApplication();
       _cachedApplication = activeApp;
 
-      emit(LoanDataLoaded(
-        loanTypes: _cachedLoanTypes,
-        activeApplication: _cachedApplication,
-      ));
+      emit(
+        LoanDataLoaded(
+          loanTypes: _cachedLoanTypes,
+          activeApplication: _cachedApplication,
+        ),
+      );
     } catch (e) {
       emit(LoanError(message: 'Failed to load application data: $e'));
     }
@@ -56,34 +58,39 @@ class LoanCubit extends Cubit<LoanState> {
       );
 
       if (response.success && response.data != null) {
-        final newApp = LoanApplicationModel.fromJson(response.data as Map<String, dynamic>);
+        final newApp = LoanApplicationModel.fromJson(
+          response.data as Map<String, dynamic>,
+        );
         _cachedApplication = newApp;
 
-        emit(LoanSubmitSuccess(
-          application: newApp,
-          message: response.message,
-        ));
+        emit(LoanSubmitSuccess(application: newApp, message: response.message));
 
         // Transition back to loaded state with active app
-        emit(LoanDataLoaded(
-          loanTypes: _cachedLoanTypes,
-          activeApplication: newApp,
-        ));
+        emit(
+          LoanDataLoaded(
+            loanTypes: _cachedLoanTypes,
+            activeApplication: newApp,
+          ),
+        );
         return true;
       } else {
         emit(LoanError(message: response.message));
-        emit(LoanDataLoaded(
-          loanTypes: _cachedLoanTypes,
-          activeApplication: _cachedApplication,
-        ));
+        emit(
+          LoanDataLoaded(
+            loanTypes: _cachedLoanTypes,
+            activeApplication: _cachedApplication,
+          ),
+        );
         return false;
       }
     } catch (e) {
       emit(LoanError(message: 'Failed to submit application: $e'));
-      emit(LoanDataLoaded(
-        loanTypes: _cachedLoanTypes,
-        activeApplication: _cachedApplication,
-      ));
+      emit(
+        LoanDataLoaded(
+          loanTypes: _cachedLoanTypes,
+          activeApplication: _cachedApplication,
+        ),
+      );
       return false;
     }
   }
@@ -113,18 +120,22 @@ class LoanCubit extends Cubit<LoanState> {
         return true;
       } else {
         emit(LoanError(message: response.message));
-        emit(LoanDataLoaded(
-          loanTypes: _cachedLoanTypes,
-          activeApplication: _cachedApplication,
-        ));
+        emit(
+          LoanDataLoaded(
+            loanTypes: _cachedLoanTypes,
+            activeApplication: _cachedApplication,
+          ),
+        );
         return false;
       }
     } catch (e) {
       emit(LoanError(message: 'Failed to resolve pendency: $e'));
-      emit(LoanDataLoaded(
-        loanTypes: _cachedLoanTypes,
-        activeApplication: _cachedApplication,
-      ));
+      emit(
+        LoanDataLoaded(
+          loanTypes: _cachedLoanTypes,
+          activeApplication: _cachedApplication,
+        ),
+      );
       return false;
     }
   }
@@ -132,9 +143,6 @@ class LoanCubit extends Cubit<LoanState> {
   /// Start fresh application after rejection or completion
   void startFreshApplication() {
     _cachedApplication = null;
-    emit(LoanDataLoaded(
-      loanTypes: _cachedLoanTypes,
-      activeApplication: null,
-    ));
+    emit(LoanDataLoaded(loanTypes: _cachedLoanTypes, activeApplication: null));
   }
 }

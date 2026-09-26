@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../logic/auth/auth_cubit.dart';
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.2),
+                                color: AppColors.primary.withValues(alpha: 0.2),
                                 blurRadius: 16,
                                 offset: const Offset(0, 6),
                               ),
@@ -134,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           border: Border.all(color: AppColors.border),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
+                              color: Colors.black.withValues(alpha: 0.02),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -154,7 +155,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 LengthLimitingTextInputFormatter(10),
                               ],
                               prefix: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: const [
@@ -167,7 +170,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                     SizedBox(width: 8),
-                                    VerticalDivider(width: 1, thickness: 1, indent: 14, endIndent: 14),
+                                    VerticalDivider(
+                                      width: 1,
+                                      thickness: 1,
+                                      indent: 14,
+                                      endIndent: 14,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -201,7 +209,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.shield_outlined, size: 16, color: AppColors.accent),
+                          Icon(
+                            Icons.shield_outlined,
+                            size: 16,
+                            color: AppColors.accent,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Secure • Simple • Fast',

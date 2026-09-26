@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
 
 class CustomButton extends StatelessWidget {
@@ -45,12 +46,10 @@ class CustomButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor ?? AppColors.primary,
         foregroundColor: textColor ?? Colors.white,
-        disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+        disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
         minimumSize: const Size.fromHeight(50),
         elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: _buildChild(textColor ?? Colors.white),
     );
@@ -88,11 +87,7 @@ class CustomButton extends StatelessWidget {
 
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-        color: color,
-      ),
+      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: color),
     );
   }
 }

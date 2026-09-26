@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../logic/auth/auth_cubit.dart';
 import '../../../logic/auth/auth_state.dart';
@@ -11,11 +13,7 @@ class OtpScreen extends StatefulWidget {
   final String phone;
   final int resendCooldown;
 
-  const OtpScreen({
-    super.key,
-    required this.phone,
-    this.resendCooldown = 30,
-  });
+  const OtpScreen({super.key, required this.phone, this.resendCooldown = 30});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -96,7 +94,10 @@ class _OtpScreenState extends State<OtpScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: AppColors.textPrimary,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -127,7 +128,9 @@ class _OtpScreenState extends State<OtpScreen> {
                           height: 1.4,
                         ),
                         children: [
-                          const TextSpan(text: 'We sent a 6-digit verification code to '),
+                          const TextSpan(
+                            text: 'We sent a 6-digit verification code to ',
+                          ),
                           TextSpan(
                             text: '+91 ${widget.phone}',
                             style: const TextStyle(
@@ -149,7 +152,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
+                            color: Colors.black.withValues(alpha: 0.02),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -194,14 +197,21 @@ class _OtpScreenState extends State<OtpScreen> {
                               ),
                               filled: true,
                               fillColor: AppColors.background,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.border),
+                                borderSide: const BorderSide(
+                                  color: AppColors.border,
+                                ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 2,
+                                ),
                               ),
                             ),
                             onChanged: (val) {
@@ -214,15 +224,24 @@ class _OtpScreenState extends State<OtpScreen> {
 
                           // Dev Bypass Quick Action
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.accent.withOpacity(0.08),
+                              color: AppColors.accent.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                              border: Border.all(
+                                color: AppColors.accent.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.bolt, size: 16, color: AppColors.accent),
+                                const Icon(
+                                  Icons.bolt,
+                                  size: 16,
+                                  color: AppColors.accent,
+                                ),
                                 const SizedBox(width: 6),
                                 const Expanded(
                                   child: Text(
