@@ -109,4 +109,32 @@ class LivewireOperationsTest extends TestCase
         $this->assertEquals('PENDENCY_RAISED', $app->status);
         $this->assertCount(1, $app->pendencies);
     }
+
+    public function test_livewire_home_emi_calculator(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Livewire::test(\App\Livewire\Home::class)
+            ->assertSee('Interactive EMI Calculator')
+            ->set('loanAmount', 1000000)
+            ->set('interestRate', 12)
+            ->set('tenureYears', 5)
+            ->assertSee('Personal Loan');
+    }
+
+    public function test_livewire_navbar_logout(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $sales = User::where('role', 'sales_executive')->first();
+
+        $this->actingAs($sales);
+
+        Livewire::test(\App\Livewire\Components\Navbar::class)
+            ->assertSee($sales->name)
+            ->assertSee('sales_executive')
+            ->call('logout')
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+    }
 }

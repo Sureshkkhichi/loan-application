@@ -6,12 +6,11 @@ use App\Http\Controllers\Web\ApplicationController;
 use App\Livewire\Auth\Login as LivewireLogin;
 use App\Livewire\Dashboard as LivewireDashboard;
 use App\Livewire\Applications\ApplicationDetail as LivewireApplicationDetail;
+use App\Livewire\Home as LivewireHome;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root to dashboard/login
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
+// Public Home Portal (Livewire Reactive Landing & EMI Calculator)
+Route::get('/', LivewireHome::class)->name('home');
 
 // Authentication routes (Livewire interactive login + fallback POST)
 Route::middleware('guest')->group(function () {

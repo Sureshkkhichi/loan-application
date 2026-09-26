@@ -17,19 +17,7 @@ class ApplicationController extends Controller
 {
     public function show($id)
     {
-        $application = LoanApplication::with([
-            'customer',
-            'loanType',
-            'assignedSales',
-            'documents.uploadedBy',
-            'pendencies.createdBy',
-            'activities.user',
-        ])->findOrFail($id);
-
-        $salesExecutives = User::where('role', 'sales_executive')->where('is_active', true)->get();
-        $currentUser = Auth::user();
-
-        return view('applications.show', compact('application', 'salesExecutives', 'currentUser'));
+        return redirect()->route('applications.show', $id);
     }
 
     /**

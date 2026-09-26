@@ -43,43 +43,8 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-[#123B6D] text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
-                    <div class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-400/40 flex items-center justify-center font-bold text-teal-300 text-lg">
-                        LD
-                    </div>
-                    <div>
-                        <span class="text-xl font-bold tracking-tight text-white">Loan<span class="text-teal-400">Desk</span></span>
-                        <span class="hidden sm:inline-block ml-2 text-xs uppercase px-2 py-0.5 rounded bg-blue-900/60 text-blue-200 border border-blue-700/50">Operations Portal</span>
-                    </div>
-                </a>
-            </div>
-
-            @auth
-            <div class="flex items-center space-x-4">
-                <div class="hidden md:flex flex-col text-right">
-                    <span class="text-sm font-semibold text-white">{{ Auth::user()->name }}</span>
-                    <span class="text-xs text-blue-200 capitalize font-medium">
-                        {{ str_replace('_', ' ', Auth::user()->role) }}
-                    </span>
-                </div>
-                <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full uppercase tracking-wider
-                    {{ Auth::user()->role === 'admin' ? 'bg-amber-500/20 text-amber-300 border border-amber-400/30' : (Auth::user()->role === 'manager' ? 'bg-purple-500/20 text-purple-300 border border-purple-400/30' : 'bg-teal-500/20 text-teal-300 border border-teal-400/30') }}">
-                    {{ Auth::user()->role }}
-                </span>
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg border border-white/20 transition-all font-medium">
-                        Sign Out
-                    </button>
-                </form>
-            </div>
-            @endauth
-        </div>
-    </header>
+    <!-- Livewire Reactive Navigation Bar -->
+    <livewire:components.navbar />
 
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -60,16 +60,26 @@
 
 ---
 
-## 6. Web Portal Operations Architecture (Livewire Reactive Components)
-- **Framework**: Laravel 12 + **Livewire 3/4** (Zero-reload reactive SPA experience for internal operations).
-- **Interactive Livewire Components**:
-  1. `App\Livewire\Auth\Login`: Staff authentication with live validation and loading indicators.
-  2. `App\Livewire\Dashboard`:
+## 6. Web Portal Operations Architecture (100% Livewire Reactive Components)
+- **Framework**: Laravel 12 + **Livewire 3/4** (Zero-reload reactive SPA experience across the entire web application).
+- **100% Views Converted to Livewire**: All legacy Blade views have been completely removed and refactored into pure reactive Livewire components.
+- **Interactive Livewire Components Suite**:
+  1. `App\Livewire\Home` (`resources/views/livewire/home.blade.php`):
+     - Public landing page with Modern Trust Fintech design.
+     - Live interactive EMI Calculator widget (Loan amount, interest rate, tenure sliders with real-time monthly EMI, total interest, and total payable calculation).
+     - Active loan products showcase.
+  2. `App\Livewire\Components\Navbar` (`resources/views/livewire/components/navbar.blade.php`):
+     - Livewire reactive navigation bar with active user role badge.
+     - Real-time notification counters (`New Leads` & `For Review` alerts).
+     - Reactive sign-out action (`wire:click="logout"`).
+  3. `App\Livewire\Auth\Login` (`resources/views/livewire/auth/login.blade.php`):
+     - Staff authentication with live validation and loading indicators.
+  4. `App\Livewire\Dashboard` (`resources/views/livewire/dashboard.blade.php`):
      - Real-time debounced lead search (`wire:model.live.debounce.300ms="search"`).
      - Reactive metric pipeline cards (`All`, `New`, `Calling`, `Review`, `With Bank`, `Pendency`, `Disbursed`, `Rejected`).
      - Sales Rep "My Leads" toggle (`wire:click="toggleMyLeads"`).
      - Live pagination (`WithPagination`) and instant status badges.
-  3. `App\Livewire\Applications\ApplicationDetail`:
+  5. `App\Livewire\Applications\ApplicationDetail` (`resources/views/livewire/applications/application-detail.blade.php`):
      - Sales Lead Assignment (`wire:click="assignSales"`).
      - Detailed Caller Form auto-save with live field validation (`wire:click="saveDetails"`).
      - Live document upload (`WithFileUploads`) with upload progress indicator.
